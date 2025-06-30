@@ -1,47 +1,42 @@
 import { Task, tasks } from "../../data";
+import { TaskModel } from "../../models/task.model";
 
-type AddTaskInput = {
+type CreateTaskInput = {
   title: string;
+  description: string;
+  priority: string;
 };
 
 type UpdateTaskInput = {
   title: string;
+  description: string;
+  priority: string;
   completed: boolean;
 };
 
 export const taskResolver = {
   Query: {
-    getTasks: () => tasks,
-    getTask: (_: unknown, args: { id: string }) => tasks.find((task) => task.id === args.id),
+    getTasks: async () => {
+      return await TaskModel.find().sort({ createdAt: -1 });
+    },
+    getTask: async (_: unknown, args: { id: string }) => {
+      return await TaskModel.findById(args.id);
+    },
   },
 
   Mutation: {
-    addTask: (_: unknown, { task }: { task: AddTaskInput }) => {
-      const newTask: Task = {
-        id: (tasks.length + 1).toString(),
-        title: task.title,
-        completed: false,
-      };
-
-      tasks.push(newTask);
-      return newTask;
+    createTask: async (_: unknown, { input }: { input: CreateTaskInput }) => {
+      const task = new TaskModel(input);
+      return await task.save();
     },
 
-    updateTask: (_: unknown, { id, data }: { id: string; data: UpdateTaskInput }) => {
-      let task = tasks.find((t) => t.id === id);
-      if (!task) return null;
-
-      Object.assign(task, data);
-      return task;
+    updateTask: async (_: unknown, { id, input }: { id: string; input: UpdateTaskInput }) => {
+      return await TaskModel.findByIdAndUpdate(id, input, { new: true });
     },
 
-    deleteTask: (_: unknown, { id }: { id: string }) => {
-      let index = tasks.findIndex((t) => t.id === id);
-
-      if (index > -1) {
-        return tasks.splice(index, 1)[0];
-      }
-      return null;
+    deleteTask: async (_: unknown, { id }: { id: string }) => {
+      const result = await TaskModel.findByIdAndDelete(id);
+      return !!result;
     },
   },
 };

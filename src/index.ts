@@ -5,6 +5,7 @@ import { expressMiddleware } from "@as-integrations/express5";
 import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHttpServer";
 import cors from "cors";
 import { resolvers, typeDefs } from "./graphql/schema";
+import mongoose from "mongoose";
 
 async function main() {
   const app = express();
@@ -17,6 +18,9 @@ async function main() {
   });
 
   await server.start();
+
+  await mongoose.connect("mongodb://localhost:27017/graphql-todo");
+  console.log("Connected to MongoDB");
 
   app.use("/graphql", cors(), express.json(), expressMiddleware(server));
 
