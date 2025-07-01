@@ -13,11 +13,12 @@ export interface ITask extends Document {
   completed: boolean;
 }
 
-const TaskSchema = new Schema<ITask>(
+const taskSchema = new Schema<ITask>(
   {
     title: {
       type: String,
       required: true,
+      unique: true,
     },
     description: {
       type: String,
@@ -37,4 +38,6 @@ const TaskSchema = new Schema<ITask>(
   }
 );
 
-export const TaskModel = mongoose.model<ITask>("Task", TaskSchema);
+taskSchema.index({ title: "text", description: "text" });
+
+export const TaskModel = mongoose.model<ITask>("Task", taskSchema);

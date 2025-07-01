@@ -1,4 +1,3 @@
-import { Task, tasks } from "../../data";
 import { TaskModel } from "../../models/task.model";
 
 type CreateTaskInput = {
@@ -15,9 +14,28 @@ type UpdateTaskInput = {
 };
 
 export const taskResolver = {
+  BaseEntity: {
+    __resolveType(obj: any) {
+      return obj.priority ? "Task" : "Event";
+    },
+  },
+
   Query: {
-    getTasks: async () => {
-      return await TaskModel.find().sort({ createdAt: -1 });
+    getTasks: async (_: unknown, args: { limit?: number; offset?: number }) => {
+      const { limit = 10, offset = 0 } = args;
+
+      const [tasks, totalCount] = await Promise.all([
+        TaskModel.find().sort({ createdAt: -1 }).skip(offset).limit(limit),
+        TaskModel.countDocuments(),
+      ]);
+
+      return {
+        tasks,
+        totalCount,
+        limit,
+        offset,
+        currentPage: Math.floor(offset / limit) + 1,
+      };
     },
     getTask: async (_: unknown, args: { id: string }) => {
       return await TaskModel.findById(args.id);

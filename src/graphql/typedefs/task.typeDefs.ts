@@ -21,6 +21,14 @@ export const taskTypedef = `#graphql
         updatedAt: String!
     }
 
+    type TaskPagination {
+        tasks: [Task!]!
+        totalCount: Int!
+        limit: Int!
+        offset: Int!
+        currentPage: Int!
+    }
+
     input CreateTaskInput {
         title: String!
         description: String
@@ -35,7 +43,7 @@ export const taskTypedef = `#graphql
     }
 
     type Query {
-        getTasks: [Task!]!
+        getTasks(limit: Int, offset: Int): TaskPagination
         getTask(id: ID!): Task
     }
 
