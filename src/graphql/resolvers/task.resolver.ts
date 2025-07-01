@@ -1,5 +1,5 @@
-import { TaskModel } from "../../models/task.model";
-import { NotFoundError, ValidationError } from "../../utils/errorHandler";
+import { TaskModel } from "@/models/task.model";
+import { NotFoundError, ValidationError } from "@/utils/errorHandler";
 
 type CreateTaskInput = {
   title: string;

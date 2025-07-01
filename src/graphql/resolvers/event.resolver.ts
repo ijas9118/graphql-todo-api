@@ -1,6 +1,6 @@
-import { EventModel } from "../../models/event.model";
-import { TaskModel } from "../../models/task.model";
-import { NotFoundError, ValidationError } from "../../utils/errorHandler";
+import { EventModel } from "@/models/event.model";
+import { TaskModel } from "@/models/task.model";
+import { NotFoundError, ValidationError } from "@/utils/errorHandler";
 
 type CreateEventInput = {
   title: string;
