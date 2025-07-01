@@ -1,5 +1,6 @@
 import { EventModel } from "../../models/event.model";
 import { TaskModel } from "../../models/task.model";
+import { NotFoundError, ValidationError } from "../../utils/errorHandler";
 
 type CreateEventInput = {
   title: string;
@@ -22,31 +23,46 @@ export const eventResolver = {
 
   Query: {
     getEvent: async (_: any, args: { id: string }) => {
-      return await EventModel.findById(args.id);
+      try {
+        const event = await EventModel.findById(args.id);
+        if (!event) {
+          throw new NotFoundError("Event", args.id);
+        }
+        return event;
+      } catch (error) {
+        throw new ValidationError("Failed to fetch event");
+      }
     },
     searchItems: async (_: any, { query }: { query: string }) => {
-      const tasks = await TaskModel.find(
-        { $text: { $search: query } },
-        { score: { $meta: "textScore" } }
-      ).sort({
-        score: { $meta: "textScore" },
-      });
+      try {
+        const tasks = await TaskModel.find(
+          { $text: { $search: query } },
+          { score: { $meta: "textScore" } }
+        ).sort({
+          score: { $meta: "textScore" },
+        });
 
-      const events = await EventModel.find(
-        { $text: { $search: query } },
-        { score: { $meta: "textScore" } }
-      ).sort({
-        score: { $meta: "textScore" },
-      });
+        const events = await EventModel.find(
+          { $text: { $search: query } },
+          { score: { $meta: "textScore" } }
+        ).sort({
+          score: { $meta: "textScore" },
+        });
 
-      return [...tasks, ...events];
+        return [...tasks, ...events];
+      } catch (error) {
+        throw new ValidationError("Failed to search items");
+      }
     },
   },
 
   Mutation: {
     createEvent: async (_: any, { input }: { input: CreateEventInput }) => {
-      console.log(input);
-      return await EventModel.create(input);
+      try {
+        return await EventModel.create(input);
+      } catch (error) {
+        throw new ValidationError("Failed to create event");
+      }
     },
   },
 };

@@ -6,6 +6,7 @@ import { ApolloServerPluginDrainHttpServer } from "@apollo/server/plugin/drainHt
 import cors from "cors";
 import { resolvers, typeDefs } from "./graphql/schema";
 import mongoose from "mongoose";
+import { GraphQLError } from "graphql";
 
 async function main() {
   const app = express();
@@ -15,6 +16,15 @@ async function main() {
     typeDefs,
     resolvers,
     plugins: [ApolloServerPluginDrainHttpServer({ httpServer })],
+    formatError: (formattedError, error) => {
+      const extensions = (error as GraphQLError)?.extensions || {};
+      return {
+        message: formattedError.message,
+        code: extensions.code || "INTERNAL_SERVER_ERROR",
+        statusCode: extensions.statusCode || 500,
+        path: formattedError.path,
+      };
+    },
   });
 
   await server.start();
